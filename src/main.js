@@ -14,6 +14,7 @@ Vue.use(IconsPlugin)
 // Font awesome imports
 import '@fortawesome/fontawesome-free/css/all.css'
 import '@fortawesome/fontawesome-free/js/all.js'
+import './registerServiceWorker'
 
 Vue.config.productionTip = false
 

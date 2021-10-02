@@ -1,5 +1,5 @@
 <template>
-  <b-container fluid class="player">
+  <b-container fluid :class="{player: true, selected: selected}">
     <b-row>
       <b-col><i class="fas fa-user"></i> {{name}}</b-col>
     </b-row>
@@ -15,7 +15,8 @@ export default {
   props: {
     id: Number,
     name: String,
-    score: Number
+    score: Number,
+    selected: Boolean
   }
 }
 </script>
@@ -23,5 +24,9 @@ export default {
 .player {
   background-color: lightgrey;
   border-radius: 5px;
+}
+
+.player.selected {
+  background-color: cadetblue;
 }
 </style>

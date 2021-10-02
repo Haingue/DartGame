@@ -2,7 +2,10 @@
   <b-container fluid id="game">
       <b-row class="mt-1 mb-3">
           <b-col class="title">Game</b-col>
-          <b-col style="text-align: right;"><b-button @click="stopParty"><i class="fas fa-sign-out-alt"></i></b-button></b-col>
+          <b-col style="text-align: right;">
+              <b-button class="menu" @click="$refs['modal-parameters'].show()"><i class="fas fa-ellipsis-v"></i></b-button>
+              <b-button class="menu" @click="stopParty"><i class="fas fa-sign-out-alt"></i></b-button>
+          </b-col>
       </b-row>
       <b-row v-for="target in targets" :key="target.value" :class="{target: true, completed: target.progress === 3}">
         <b-col>{{target.value}}</b-col>
@@ -21,15 +24,43 @@
         </b-col>
       </b-row>
       <b-row class="mt-3">
+          <b-col style="text-align: right;"><button @click="$refs['modal-rules'].show()" class="rules"><i class="fas fa-question-circle"></i></button></b-col>
+      </b-row>
+      <b-row>
           <b-col>
               <Keyboard @value="keypress"/>
           </b-col>
       </b-row>
       <b-row class="mt-3">
-          <b-col cols="6" v-for="player in players" :key="player.id" class="mb-1">
-              <Player :id="player.id" :name="player.name" :score="player.score"/>
+          <b-col cols="6" v-for="(player, idx) in players" :key="player.id" class="mb-1">
+              <Player :id="player.id" :name="player.name" :score="player.score" :selected="idx === currentPlayer"/>
           </b-col>
       </b-row>
+
+
+      <b-modal id="modal-parameters" ref="modal-parameters" centered size="xl">
+        <template #modal-header>Paramètres</template>
+
+        <b-button class="col-12" variant="primary" @click="$refs['modal-parameters'].hide(); finishGame()">Finir partie</b-button>
+
+        <template #modal-footer="{ ok }">
+            <b-button size="sm" variant="success" @click="ok()">OK</b-button>
+        </template>
+      </b-modal>
+
+      <b-modal id="modal-rules" ref="modal-rules" centered size="xl">
+        <template #modal-header>Règles</template>
+
+        <p class="my-4">Le but est de fermer tous les chiffres proposés par le système, tout en minimisant son score.</p>
+        <p class="my-4">6 nombres sont choisis par le système, les joueurs devront tenter de tirer 3 fois chaque chiffre (un double ou un triple comptent).</p>
+        <p class="my-4">Quand un joueur tire un chiffre étant déjà fermé ou ne faisant pas partie de la liste, ce joueur reçoit la valeur de ce qu'il a touchée en score.</p>
+        <p class="my-4">Quand un joueur tire un chiffre déjà fermé, il ajoute la valeur de ce qu'il a touchée à tous les autres joueurs.</p>
+        <p class="my-4">La partie se termine quand tous les chiffres ont été choisis une fois.</p>
+
+        <template #modal-footer="{ ok }">
+            <b-button size="sm" variant="success" @click="ok()">OK</b-button>
+        </template>
+      </b-modal>
 
       <b-modal id="modal-end" ref="modal-end" centered size="xl">
         <template #modal-header>Partie finie !</template>
@@ -157,10 +188,20 @@ export default {
 </script>
 
 <style>
+.menu {
+    width: 2.5em;
+    margin: 2px;
+}
 .target {
 }
 
 .target.completed, .target.completed output {
     background-color: lightgreen;
+}
+
+.rules {
+    text-align: right;
+    border: none;
+    background: none;
 }
 </style>

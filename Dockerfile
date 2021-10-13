@@ -1,4 +1,5 @@
 FROM node:lts-alpine
+#test
 
 # installe un simple serveur http pour servir un contenu statique
 RUN npm install -g http-server

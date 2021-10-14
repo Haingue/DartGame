@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dartgame-deployment
+  labels:
+    app: dartgame
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: dartgame
+  template:
+    metadata:
+      labels:
+        app: dartgame
+    spec:
+      containers:
+      - name: dartgame
+        image: haingue/dartgame:latest
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dartgame-service
+  labels:
+    app: dartgame
+    run: dartgame-service
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+  selector:
+    app: dartgame
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dartgame-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: dartgame.haingue.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: dartgame-service
+            port:
+              number: 8080

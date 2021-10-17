@@ -26,13 +26,18 @@ export default {
   components: {
     PlayerSetup
   },
+  props: {
+    gameName: String
+  },
   data: function () {
     return {
       serialId: 0,
       players: [{
         id: 0,
         name: 'Joueur 1',
-        score: 0
+        score: 0,
+        dart: 0,
+        remainingDart: 0
       }]
     }
   },
@@ -42,7 +47,9 @@ export default {
       let player = {
         id: ++this.serialId,
         name: `Player ${this.serialId + 1}`,
-        score: 0
+        score: 0,
+        dart: 0,
+        remainingDart: 0
       }
       this.players.push(player)
     },
@@ -62,11 +69,11 @@ export default {
       })
     },
     cancel: function () {
-        console.debug('Start new game')
+        console.debug('Back to home')
         this.$router.replace({name: "Home"})
     },
     startGame: function () {
-        console.debug('Start new game')
+        console.debug(`Start new ${this.gameName}`)
 
         // check players
         this.players.forEach(p => {
@@ -77,7 +84,7 @@ export default {
 
         this.$store.dispatch('savePlayers', this.players)
         .then(() => {
-          this.$router.push({name: "Game"})
+          this.$router.push({name: this.gameName})
         })
         .catch((error) => {
           console.error('Error to save player list in store: ', error)

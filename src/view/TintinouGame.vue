@@ -1,17 +1,17 @@
 <template>
   <b-container fluid id="game">
       <b-row class="mt-1 mb-3">
-          <b-col class="title">Game</b-col>
+          <b-col class="title">Jeu de Tintinou</b-col>
           <b-col style="text-align: right;">
               <b-button class="menu" @click="$refs['modal-parameters'].show()"><i class="fas fa-ellipsis-v"></i></b-button>
               <b-button class="menu" @click="stopParty"><i class="fas fa-sign-out-alt"></i></b-button>
           </b-col>
       </b-row>
-      <b-row v-for="target in targets" :key="target.value" :class="{target: true, completed: target.progress === 3}">
-        <b-col>{{target.value}}</b-col>
+      <b-row v-for="player, idx in players" :key="player.id" :class="{target: true, completed: currentPlayer === idx}">
+        <b-col>{{player.name}}</b-col>
         <b-col>
             <b-form-rating 
-                v-model="target.progress"
+                v-model="player.remainingDart"
                 icon-empty="circle"
                 icon-half="circle-half"
                 icon-full="circle-fill"
@@ -22,6 +22,7 @@
                 @change="updateProgress(target)"
             />
         </b-col>
+        <b-col>{{ player.numbers[0] }}</b-col>
       </b-row>
       <b-row class="mt-3">
           <b-col style="text-align: right;"><button @click="$refs['modal-rules'].show()" class="rules"><i class="fas fa-question-circle"></i></button></b-col>
@@ -31,12 +32,6 @@
               <Keyboard @value="keypress"/>
           </b-col>
       </b-row>
-      <b-row class="mt-3">
-          <b-col cols="6" v-for="(player, idx) in players" :key="player.id" class="mb-1">
-              <Player :id="player.id" :name="player.name" :score="player.score" :selected="idx === currentPlayer"/>
-          </b-col>
-      </b-row>
-
 
       <b-modal id="modal-parameters" ref="modal-parameters" centered size="xl">
         <template #modal-header>Paramètres</template>
@@ -51,11 +46,10 @@
       <b-modal id="modal-rules" ref="modal-rules" centered size="xl">
         <template #modal-header>Règles</template>
 
-        <p class="my-4">Le but est de fermer tous les chiffres proposés par le système, tout en minimisant son score.</p>
-        <p class="my-4">6 nombres sont choisis par le système, les joueurs devront tenter de tirer 3 fois chaque chiffre (un double ou un triple comptent).</p>
-        <p class="my-4">Quand un joueur tire un chiffre étant déjà fermé ou ne faisant pas partie de la liste, ce joueur reçoit la valeur de ce qu'il a touchée en score.</p>
-        <p class="my-4">Quand un joueur tire un chiffre déjà fermé, il ajoute la valeur de ce qu'il a touchée à tous les autres joueurs.</p>
-        <p class="my-4">La partie se termine quand tous les chiffres ont été choisis une fois.</p>
+        <p class="my-4">But: valider le chiffre 20 en premier</p>
+        <p class="my-4">Pour commencer, tous les joueurs commencent au chiffre 1.</p>
+        <p class="my-4">Chaque joueur a 3 essaies pour réussir à placer une fléchette dans leur chiffre actuel pour passer au chiffre suivant.</p>
+        <p class="my-4">Un tir réussi dans un triple, permet de sauter le chiffre suivant.</p>
 
         <template #modal-footer="{ ok }">
             <b-button size="sm" variant="success" @click="ok()">OK</b-button>
@@ -82,11 +76,9 @@
 <script>
 import Fireworks from '../components/Fireworks.vue'
 import Keyboard from '../components/Keyboard.vue'
-import Player from '../components/Player'
 export default {
-  name: 'Game',
+  name: 'TintinouGame',
   components: {
-      Player,
       Keyboard,
       Fireworks
   },
@@ -94,8 +86,7 @@ export default {
       return {
           currentPlayer: 0,
           players: [],
-          numbers: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25,50],
-          targets: [],
+          numbers: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
           level: 1,
           showFireworks: false,
           fireworksTimeout: null
@@ -103,52 +94,42 @@ export default {
   },
   methods: {
       stopParty: function () {
-          this.$router.go(-1)
+          this.$router.push({name: 'Home'})
       },
       initializeLevel: function () {
-        this.targets.splice(0, this.targets.length)
-        for(let i = 0; i < 6 && this.numbers.length > 0; i++) {
-            // choice a number in list
-            let idx = Math.floor(Math.random() * this.numbers.length);
-            let value = this.numbers.splice(idx, 1)
-            this.targets.push({
-                value: value[0],
-                progress: 0
-            })
-        }
+          this.players.forEach((player) => {
+              player.dart = 3;
+              player.remainingDart = 0;
+              player.numbers = [...this.numbers]
+          })
+          this.players[this.currentPlayer].remainingDart = this.players[this.currentPlayer].dart
       },
       updateProgress: (target) => {
           console.debug(`Update target value: ${target}`)
       },
       keypress: function (keypress) {
         console.debug(`Keypress, user: ${JSON.stringify(this.players[this.currentPlayer])}, key: ${JSON.stringify(keypress)}`)
-        let target = this.targets.find(t => t.value == keypress.value)
-        if (target != null) {
-            // the selection is a target number
-            if (target.progress < 3) {
-                // upgrade progress
-                target.progress += (keypress.triple ? 3 : keypress.double ? 2 : 1)
-            } else {
-                // increase score of other player
-                this.players.forEach((element, idx) => {
-                    if (idx !== this.currentPlayer) {
-                        element.score += keypress.triple ? 3 * keypress.value : keypress.double ? 2 * keypress.value : keypress.value
-                    }
-                });
-            }
-        } else {
-            // it's a bad target, penality
-            this.players[this.currentPlayer].score += keypress.triple ? 3 * keypress.value : keypress.double ? 2 * keypress.value : keypress.value
-        }
-        this.currentPlayer = (this.currentPlayer + 1) % this.players.length
+        const player = this.players[this.currentPlayer]
 
-        if (!this.targets.find(t => t.progress < 3)) {
-            console.debug('All targets are closed')
-            if (this.numbers.length > 0) {
-                this.initializeLevel()
-            } else {
+        if (player.numbers[0] === keypress.value) {
+            player.score += keypress.value
+            if (keypress.triple) {
+                // skip next number
+                player.numbers.splice(0, 1)
+            }
+            // next number
+            player.numbers.splice(0, 1)
+
+            if (player.numbers.length == 0) {
+                // no numbers remaining, this player win
                 this.finishGame()
             }
+        }
+
+        player.remainingDart--;
+        if (player.remainingDart == 0) {
+            this.currentPlayer = (this.currentPlayer + 1) % this.players.length
+            this.players[this.currentPlayer].remainingDart = player.dart
         }
       },
       finishGame: function () {
@@ -156,7 +137,7 @@ export default {
           this.showFireworks = true
 
           // sort player by score
-          this.players = this.players.sort((a, b) => a.score - b.score)
+          this.players = this.players.sort((a, b) => b.score - a.score)
 
           this.fireworksTimeout = setTimeout(() => {
               this.showFireworks = false
@@ -178,7 +159,7 @@ export default {
   beforeMount: function () {
       this.players.push(...this.$store.getters.players)
       if (this.players == null || this.players.length == 0) {
-          this.$router.replace({name: 'SetupGame'})
+          this.$router.replace({name: 'SetupGame', params: {gameName: 'Game2'}})
       } else {
             this.initializeLevel()
             console.debug(`Load game: players=${JSON.stringify(this.players)}`)
@@ -191,8 +172,6 @@ export default {
 .menu {
     width: 2.5em;
     margin: 2px;
-}
-.target {
 }
 
 .target.completed, .target.completed output {

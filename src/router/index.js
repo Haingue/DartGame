@@ -13,12 +13,18 @@ export default new VueRouter({
         {
             path: "/setup/game",
             name: "SetupGame",
+            props: true,
             component: () => import('../view/SetupGame')
         },
         {
-            path: "/game",
-            name: "Game",
-            component: () => import('../view/Game')
+            path: "/game/game1",
+            name: "Game1",
+            component: () => import('../view/Game1')
+        },
+        {
+            path: "/game/tintinou-game",
+            name: "TintinouGame",
+            component: () => import('../view/TintinouGame')
         }
     ]
 })

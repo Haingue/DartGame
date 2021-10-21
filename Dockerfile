@@ -11,7 +11,8 @@ RUN npm install -g http-server
 WORKDIR /app
 
 # installe les dépendances du projet
-RUN git clone https://github.com/Haingue/DartGame.git /app
+ADD https://api.github.com/repos/Haingue/dartgame/git/refs/heads/master /version.json
+RUN git clone -b master https://github.com/Haingue/DartGame.git /app
 RUN npm install
 
 # construit l'app pour la production en la minifiant
@@ -33,7 +34,8 @@ RUN npm install -g http-server
 WORKDIR /app
 
 # installe les dépendances du projet
-RUN git clone https://github.com/Haingue/DartGame.git /app
+ADD https://api.github.com/repos/Haingue/dartgame/git/refs/heads/master /version.json
+RUN git clone -b master https://github.com/Haingue/DartGame.git /app
 RUN npm install
 
 # construit l'app pour la production en la minifiant

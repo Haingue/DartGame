@@ -6,11 +6,11 @@
       <b-row>
           <b-col style="font-size: 10em;"><i class="fas fa-bullseye"></i></b-col>
       </b-row>
-      <b-row>
-          <b-col><b-button @click="startGame('Game1')">Jeu de Tintinou où on comprend rien</b-button></b-col>
+      <b-row class="mt-3">
+          <b-col><b-button @click="startGame('SimpleCriquetGame')">Simple criquet</b-button></b-col>
       </b-row>
       <b-row class="mt-3">
-          <b-col><b-button @click="startGame('TintinouGame')">Jeu de Tintinou pas trop mal</b-button></b-col>
+          <b-col><b-button @click="startGame('CrazyCriquetMasterOutGame')">Crazy criquet master out</b-button></b-col>
       </b-row>
   </b-container>
 </template>

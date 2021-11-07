@@ -36,8 +36,8 @@ export default {
         id: 0,
         name: 'Joueur 1',
         score: 0,
-        dart: 0,
-        remainingDart: 0
+        dartNumber: 0,
+        dartCounter: 0
       }]
     }
   },
@@ -48,8 +48,8 @@ export default {
         id: ++this.serialId,
         name: `Player ${this.serialId + 1}`,
         score: 0,
-        dart: 0,
-        remainingDart: 0
+        dartNumber: 0,
+        dartCounter: 0
       }
       this.players.push(player)
     },

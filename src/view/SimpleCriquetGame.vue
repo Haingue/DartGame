@@ -1,7 +1,7 @@
 <template>
   <b-container fluid id="game">
       <b-row class="mt-1 mb-3">
-          <b-col class="title">Jeu de Tintinou</b-col>
+          <b-col class="title">Simple criquet</b-col>
           <b-col style="text-align: right;">
               <b-button class="menu" @click="$refs['modal-parameters'].show()"><i class="fas fa-ellipsis-v"></i></b-button>
               <b-button class="menu" @click="stopParty"><i class="fas fa-sign-out-alt"></i></b-button>
@@ -11,7 +11,7 @@
         <b-col>{{player.name}}</b-col>
         <b-col>
             <b-form-rating 
-                v-model="player.remainingDart"
+                v-model="player.dartCounter"
                 icon-empty="circle"
                 icon-half="circle-half"
                 icon-full="circle-fill"
@@ -77,7 +77,7 @@
 import Fireworks from '../components/Fireworks.vue'
 import Keyboard from '../components/Keyboard.vue'
 export default {
-  name: 'TintinouGame',
+  name: 'SimpleCriquetGame',
   components: {
       Keyboard,
       Fireworks
@@ -86,7 +86,7 @@ export default {
       return {
           currentPlayer: 0,
           players: [],
-          numbers: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
+          numbers: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20, 25, 50],
           level: 1,
           showFireworks: false,
           fireworksTimeout: null
@@ -98,11 +98,11 @@ export default {
       },
       initializeLevel: function () {
           this.players.forEach((player) => {
-              player.dart = 3;
-              player.remainingDart = 0;
+              player.dartNumber = 3;
+              player.dartCounter = 0;
               player.numbers = [...this.numbers]
           })
-          this.players[this.currentPlayer].remainingDart = this.players[this.currentPlayer].dart
+          this.players[this.currentPlayer].dartCounter = this.players[this.currentPlayer].dartNumber
       },
       updateProgress: (target) => {
           console.debug(`Update target value: ${target}`)
@@ -126,10 +126,10 @@ export default {
             }
         }
 
-        player.remainingDart--;
-        if (player.remainingDart == 0) {
+        player.dartCounter--;
+        if (player.dartCounter == 0) {
             this.currentPlayer = (this.currentPlayer + 1) % this.players.length
-            this.players[this.currentPlayer].remainingDart = player.dart
+            this.players[this.currentPlayer].dartCounter = player.dartNumber
         }
       },
       finishGame: function () {
@@ -159,7 +159,7 @@ export default {
   beforeMount: function () {
       this.players.push(...this.$store.getters.players)
       if (this.players == null || this.players.length == 0) {
-          this.$router.replace({name: 'SetupGame', params: {gameName: 'Game2'}})
+          this.$router.replace({name: 'SetupGame', params: {gameName: 'SimpleCriquetGame'}})
       } else {
             this.initializeLevel()
             console.debug(`Load game: players=${JSON.stringify(this.players)}`)

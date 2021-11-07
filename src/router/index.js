@@ -17,14 +17,14 @@ export default new VueRouter({
             component: () => import('../view/SetupGame')
         },
         {
-            path: "/game/game1",
-            name: "Game1",
-            component: () => import('../view/Game1')
+            path: "/game/simplecriquet-game",
+            name: "SimpleCriquetGame",
+            component: () => import('../view/SimpleCriquetGame')
         },
         {
-            path: "/game/tintinou-game",
-            name: "TintinouGame",
-            component: () => import('../view/TintinouGame')
+            path: "/game/crazycriquetmasterout-game",
+            name: "CrazyCriquetMasterOutGame",
+            component: () => import('../view/CrazyCriquetMasterOutGame')
         }
     ]
 })

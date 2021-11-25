@@ -1,11 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+   name: dartgame
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dartgame-deployment
+  namespace: dartgame
   labels:
     app: dartgame
 spec:
-  replicas: 3
+  #replicas: 3
   selector:
     matchLabels:
       app: dartgame
@@ -17,16 +23,52 @@ spec:
       containers:
       - name: dartgame
         image: haingue/dartgame:latest
+        imagePullPolicy: "Always"
         ports:
         - containerPort: 8080
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: dartgame-scale
+  namespace: dartgame
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: dartgame-deployment
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+  - type: Object
+    object:
+      metric:
+        name: requests-per-second
+      describedObject:
+        apiVersion: networking.k8s.io/v1beta1
+        kind: Ingress
+        name: dartgame-ingress
+      target:
+        type: Value
+        value: 1k
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: dartgame-service
+  namespace: dartgame
   labels:
     app: dartgame
-    run: dartgame-service
 spec:
   ports:
   - port: 8080
@@ -38,6 +80,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: dartgame-ingress
+  namespace: dartgame
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
